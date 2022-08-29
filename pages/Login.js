@@ -1,11 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ImageBackground } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, ImageBackground, Button } from 'react-native';
+import { user } from "../firebase.js"
 import iconVaccine from "../assets/icon-vaccine.png"
 import background from "../assets/background-initial.png"
-import Button from "../components/Button.js"
 import Input from "../components/Input.js"
 
 export default function Login() {
+  const [email, setEmail] = useState(null)
+  const [password, setPassword] = useState(null)
+  function handleUsernameChange(event) { setEmail(event.target.value) }
+  function handlePasswordChange(event) { setPassword(event.target.value) }
+  async function login() {
+    const userInformation = await user.signIn(email, password)
+    console.log(userInformation)
+    //TODO: add change user screen
+  }
   return (
     <View style={styles.container}>
       <ImageBackground source={background} style={styles.image} resizeMode="cover">
@@ -15,14 +25,14 @@ export default function Login() {
         </div>
         <Text style={styles.centerText}>Controle as suas vacinas e fique seguro</Text>
         <div className="form-inputs">
-          <Input label="E-mail" type="email" placeholder="email@example.com" />
-          <Input label="Senha" type="password" placeholder="**************" />
+          <Input label="E-mail" type="email" placeholder="email@example.com" onChange={handleUsernameChange} />
+          <Input label="Senha" type="password" placeholder="**************" onChange={handlePasswordChange} />
           <Text style={styles.warning}>E-mail e/ou senha inválidos.</Text>
         </div>
         <div className="form-buttons">
-          <Button text="Entrar" color="green" size="m" />
-          <Button text="Criar minha conta" color="lightBlue" size="m" />
-          <Button text="Esqueci minha senha" color="lightGrey" size="m" />
+          <Button title="Entrar" color="green"  onPress={login}/>
+          <Button title="Criar minha conta" color="blue" />
+          <Button title="Esqueci minha senha" color="grey" />
         </div>
       </ImageBackground>
       <StatusBar style="auto" />
