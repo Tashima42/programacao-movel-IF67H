@@ -1,21 +1,24 @@
 import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, Image } from 'react-native';
+import { user } from "../firebase.js"
 import iconVaccine from "../assets/icon-vaccine.png"
 import Input from "../components/Input.js"
 
-export default function CreateVaccine() {
+export default function ForgotPassword({ navigation }) {
+  const [email, setEmail] = useState(null)
+  function handleUsernameChange(event) { setEmail(event.target.value) }
+  async function forgotPassword() {
+    await user.resetPassword(email)
+    navigation.navigate('Login')
+  }
   return (
     <View style={styles.container}>
-      <View className="form-inputs">
-        <Input label="Data de vacinação" type="date" placeholder="29/08/2000" textColor="black" />
-        <Input label="Vacina" type="text" placeholder="Hepatite B" textColor="black" />
-        {/* TODO: Add radio button component */}
-        <Input label="Sexo" type="radio" placeholder="" textColor="black" />
-        <Input label="Comprovante" type="file" placeholder="" textColor="black" />
-        <Input label="Próxima vacinação" type="date" placeholder="29/08/2000" textColor="black" />
-      </View>
-      <View className="form-buttons">
-        <Button title="Cadastrar" color="green"/>
+      <View className="title" style={styles.title}>
+        <Image src={iconVaccine}></Image>
+        <Text style={styles.title.text}>My Health</Text>
+        <Input label="E-mail" type="email" placeholder="email@example.com" onChange={handleUsernameChange} />
+        <Button title="Recuperar senha" color="green" onPress={forgotPassword}/>
       </View>
       <StatusBar style="auto" />
     </View>
