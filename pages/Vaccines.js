@@ -92,8 +92,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItens: "center",
+    backgroundColor: "#ADD4D0",
   },
   image: {
     flex: 1,

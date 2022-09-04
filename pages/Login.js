@@ -10,10 +10,9 @@ export default function Login({ navigation }) {
   const [email, setEmail] = useState(null)
   const [password, setPassword] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  function handleUsernameChange(event) { setEmail(event.target.value) }
-  function handlePasswordChange(event) { setPassword(event.target.value) }
   async function login() {
     try {
+      console.log({ email, password })
       const userInformation = await user.signIn(email, password)
       console.log(userInformation)
       navigation.navigate('Vaccines')
@@ -34,8 +33,8 @@ export default function Login({ navigation }) {
           </View>
           <Text style={styles.centerText}>Controle as suas vacinas e fique seguro</Text>
           <View className="form-inputs" style={styles.formInputs}>
-            <Input label="E-mail" type="email" placeholder="email@example.com" onChange={handleUsernameChange} />
-            <Input label="Senha" type="password" placeholder="**************" onChange={handlePasswordChange} />
+            <Input label="E-mail" type="email" placeholder="email@example.com" onChangeText={setEmail} />
+            <Input label="Senha" type="password" placeholder="**************" onChangeText={setPassword} />
             <Text style={styles.warning}>{errorMessage}</Text>
           </View>
           <View className="form-buttons" style={styles.formButtons}>
