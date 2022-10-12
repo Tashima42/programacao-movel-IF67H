@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, FlatList, Pressable } from 'react-native';
+import { StyleSheet, View, FlatList, Pressable, TextInput } from 'react-native';
 import React from 'react';
 import Vaccine from '../components/Vaccine';
 import Header from "../components/Header"
@@ -10,16 +10,12 @@ import { selectVaccine } from "../redux/actions"
 
 function Vaccines(props) {
   const { navigation } = props
+  const [vaccinesBkp] = React.useState(props.vaccines)
   const [vaccines, setVaccines] = React.useState(props.vaccines)
   function navigateToCreateVaccine() {
     navigation.navigate("CreateVaccine")
   }
 
-  React.useEffect(() => {
-    console.log("load vaccines")
-    setVaccines(props.vaccines)
-  }, [navigation, vaccines])
- 
   function renderVaccine({ item }) {
     const { title, dose, date, img, nextDose, empty, id } = item
     return (
@@ -32,11 +28,22 @@ function Vaccines(props) {
       navigation.navigate("EditVaccine")
     }
   }
+  function filterVaccines(value = "") {
+    console.log(value)
+    const vacs = vaccinesBkp.filter(vac => {
+      if (vac.title.toLowerCase().includes(value.toLowerCase())) return true
+    })
+    setVaccines(vacs)
+  }
+
 
   return (
     <View style={styles.container}>
       <Header navigation={navigation} />
       <View style={styles.body}>
+        <View style={styles.filter}>
+          <TextInput placeholder="PESQUISAR VACINA" onChangeText={filterVaccines} />
+        </View>
         <View className="vaccines" style={styles.vaccines}>
           <FlatList
             data={vaccines}
@@ -69,6 +76,13 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     justifyItems: 'flex-end',
+  },
+  filter: {
+    backgroundColor: "white",
+    width: "90%",
+    alignSelf: "center",
+    marginTop: 20,
+    marginBottom: 20,
   }
 });
 
