@@ -1,26 +1,32 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, Image } from 'react-native';
 import { user } from "../firebase.js"
-import iconVaccine from "../assets/icon-vaccine.png"
-import Input from "../components/Input.js"
-
+import { StyleSheet, View, Text, TextInput } from 'react-native';
+import Header from "../components/Header"
+import Button from "../components/Button"
 export default function ForgotPassword({ navigation }) {
   const [email, setEmail] = useState(null)
-  function handleUsernameChange(event) { setEmail(event.target.value) }
   async function forgotPassword() {
-    await user.resetPassword(email)
-    navigation.navigate('Login')
+    const userInformation = await user.resetPassword(email)
+    console.log(userInformation)
+    navigation.navigate("Login")
   }
   return (
     <View style={styles.container}>
-      <View className="title" style={styles.title}>
-        <Image src={iconVaccine}></Image>
-        <Text style={styles.title.text}>My Health</Text>
-        <Input label="E-mail" type="email" placeholder="email@example.com" onChange={handleUsernameChange} />
-        <Button title="Recuperar senha" color="green" onPress={forgotPassword}/>
-      </View>
-      <StatusBar style="auto" />
+      <Header navigation={navigation} />
+      <View style={styles.body}>
+        <View style={styles.inputs}>
+          <View style={styles.inputs.outer}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput style={styles.textInput} placeholder="email@example.com" placeholderTextColor="#3F92C5" onChangeText={setEmail} autoCapitalize='none'> </TextInput>
+          </View>
+        </View>
+        <View className="form-buttons" style={styles.buttonContainer}>
+          <View style={styles.saveButton}>
+            <Button title="Recuperar senha" color="green" onPress={forgotPassword} />
+          </View>
+        </View>
+      </View><StatusBar style="auto" />
     </View>
   );
 }
@@ -32,20 +38,38 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItens: "center",
   },
-  image: {
+  body: {
     flex: 1,
-    justifyContent: 'center'
+    backgroundColor: "#ADD4D0",
+    padding: 20,
+    justifyContent: "center",
   },
-  title: {
-    flex: 1,
-    flexDirection: "row",
-    text: {
-      fontSize: "30px",
-      textDecorationLine: 'underline'
-    },
-    height: "30px"
+  buttonContainer: {
+    marginBottom: 40,
   },
-  centerText: {
-    fontSize: "30px"
-  }
+  inputs: {
+    alignItens: "center",
+    justifyContent: "center",
+    outer: {
+      alignSelf: "center",
+    }
+  },
+  label: {
+    color: 'white',
+    alignSelf: "flex-start",
+    fontSize: 15,
+    color: 'white',
+    marginLeft: 10,
+  },
+  textInput: {
+    marginLeft: 10,
+    width: 300,
+    height: 25,
+    fontSize: 20,
+    backgroundColor: "white",
+    marginBottom: 10,
+  },
+  saveButton: {
+    marginTop: 200,
+  },
 });

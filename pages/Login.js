@@ -1,20 +1,23 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, ImageBackground, Button, Image } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, Image, TextInput } from 'react-native';
 import { user } from "../firebase.js"
 import iconVaccine from "../assets/icon-vaccine.png"
 import background from "../assets/background-initial.png"
-import Input from "../components/Input.js"
+import Button from '../components/Button.js';
+import { connect } from 'react-redux';
+import { setUser } from '../redux/actions.js';
 
-export default function Login({ navigation }) {
+function Login(props) {
+  const { navigation } = props
   const [email, setEmail] = useState(null)
-  const [password, setPassword] = useState(null)
+  const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState(null)
   async function login() {
     try {
-      console.log({ email, password })
       const userInformation = await user.signIn(email, password)
       console.log(userInformation)
+      props.setUser(userInformation)
       navigation.navigate('Vaccines')
     } catch (error) {
       console.error(error)
@@ -33,11 +36,17 @@ export default function Login({ navigation }) {
           </View>
           <Text style={styles.centerText}>Controle as suas vacinas e fique seguro</Text>
           <View className="form-inputs" style={styles.formInputs}>
-            <Input label="E-mail" type="email" placeholder="email@example.com" onChangeText={setEmail} />
-            <Input label="Senha" type="password" placeholder="**************" onChangeText={setPassword} />
+            <View style={styles.inputs.outer}>
+              <Text style={styles.label}>E-mail</Text>
+              <TextInput style={styles.textInput} placeholder="email@example.com" placeholderTextColor="#3F92C5" onChangeText={setEmail} autoCapitalize='none' > </TextInput>
+            </View>
+            <View style={styles.inputs.outer}>
+              <Text style={styles.label}>Senha</Text>
+              <TextInput style={styles.textInput} placeholder="**************" placeholderTextColor="#3F92C5" onChangeText={setPassword} secureTextEntry={true} > </TextInput>
+            </View>
             <Text style={styles.warning}>{errorMessage}</Text>
           </View>
-          <View className="form-buttons" style={styles.formButtons}>
+          <View style={styles.formButtons}>
             <Button style={styles.button} title="Entrar" color="green" onPress={login} />
             <Button style={styles.button} title="Criar minha conta" color="blue" onPress={navigateToCreateAccount} />
             <Button style={styles.button} title="Esqueci minha senha" color="grey" onPress={navigateToForgotPassword} />
@@ -73,10 +82,44 @@ const styles = StyleSheet.create({
     marginTop: 70,
   },
   formButtons: {
+    display: "flex",
+    height: 200,
     flexDirection: "column",
-    justifySelf: "flex-end",
+    justifyContent: "space-between",
   },
   button: {
-    marginTop: 20,
-  }
+    alignSelf: "flex-end",
+  },
+  inputs: {
+    alignItens: "center",
+    justifyContent: "center",
+    outer: {
+      alignSelf: "center",
+    }
+  },
+  label: {
+    color: 'white',
+    alignSelf: "flex-start",
+    fontSize: 15,
+    color: 'white',
+    marginLeft: 10,
+  },
+  textInput: {
+    marginLeft: 10,
+    width: 280,
+    height: 25,
+    fontSize: 20,
+    backgroundColor: "white",
+    marginBottom: 10,
+  },
+  warning: {
+    color: "red",
+    marginLeft: 58,
+    marginBottom: 80,
+  },
 });
+
+export default connect(
+  null,
+  { setUser }
+)(Login)

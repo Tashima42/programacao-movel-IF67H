@@ -9,7 +9,7 @@ const firebaseConfig = {
   projectId: "projeto-mobile-7af32",
   storageBucket: "projeto-mobile-7af32.appspot.com",
   messagingSenderId: "134291586056",
-  appId: "1:134291586056:web:dcd4767cd5d8a6f2c925bd"
+  appId: "1:134291586056:web:e2eb7a21e8b1fdacc925bd"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -22,9 +22,9 @@ const strg = getStorage(app);
 export const user = {
   create: async (email, password, birthDate, name, sex) => {
     try {
-      const { user: { uid, accessToken } } = await createUserWithEmailAndPassword(auth, email, password)
+      const { user: { uid } } = await createUserWithEmailAndPassword(auth, email, password)
       await setDoc(doc(db, "users", uid), { birthDate: Timestamp.fromDate(birthDate), name, sex, uid })
-      return accessToken
+      return uid
     } catch (error) {
       console.error(error)
       throw error

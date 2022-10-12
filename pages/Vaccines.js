@@ -1,79 +1,52 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Button, FlatList } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, View, FlatList, Pressable } from 'react-native';
+import React from 'react';
 import Vaccine from '../components/Vaccine';
 import Header from "../components/Header"
+import Button from "../components/Button"
+import { connect } from "react-redux"
+import { getVaccines } from "../redux/selectors"
+import { selectVaccine } from "../redux/actions"
 
-export default function Vaccines({ navigation }) {
-  const [vaccines, setVaccines] = useState([
-    {
-      id: 1,
-      title: "BCG",
-      dose: "Dose Unica",
-      date: "11/06/2022",
-      img: "https://firebasestorage.googleapis.com/v0/b/projeto-mobile-7af32.appspot.com/o/public%2Fface2.png?alt=media"
-    },
-    {
-      id: 2,
-      title: "Febre Amarela",
-      dose: "1a. dose",
-      date: "11/06/2022",
-      img: "https://firebasestorage.googleapis.com/v0/b/projeto-mobile-7af32.appspot.com/o/public%2Fface2.png?alt=media",
-      nextDose: "Próxima dose em 11/10/2022"
-    },
-    {
-      id: 3,
-      title: "Hepatite B",
-      dose: "1a. dose",
-      date: "11/06/2022",
-      img: "https://firebasestorage.googleapis.com/v0/b/projeto-mobile-7af32.appspot.com/o/public%2Fface2.png?alt=media",
-      nextDose: "Próxima dose em 11/10/2022"
-    },
-    {
-      id: 4,
-      title: "Poliomelite",
-      dose: "1a. dose",
-      date: "11/06/2022",
-      img: "https://firebasestorage.googleapis.com/v0/b/projeto-mobile-7af32.appspot.com/o/public%2Fface2.png?alt=media",
-      nextDose: "Próxima dose em 11/10/2022"
-    },
-  ])
-  function createVaccines(vaccines) {
-    const r = Math.floor(vaccines.length / 2)
-    let lastElm = vaccines.length - r * 2;
-    while (lastElm !== 2) {
-      vaccines.push({
-        id: `empty-${lastElm}`,
-        title: `empty-${lastElm}`,
-        dose: `empty-${lastElm}`,
-        date: `empty-${lastElm}`,
-        img: `empty-${lastElm}`,
-        nextDose: `empty-${lastElm}`,
-        empty: true
-      });
-      lastElm += 1;
-    }
-    return vaccines;
+function Vaccines(props) {
+  const { navigation } = props
+  const [vaccines, setVaccines] = React.useState(props.vaccines)
+  function navigateToCreateVaccine() {
+    navigation.navigate("CreateVaccine")
   }
 
+  React.useEffect(() => {
+    console.log("load vaccines")
+    setVaccines(props.vaccines)
+  }, [navigation, vaccines])
+ 
   function renderVaccine({ item }) {
-    const { title, dose, date, img, nextDose, empty } = item
-    return <Vaccine title={title} dose={dose} date={date} img={img} nextDose={nextDose} empty={empty} />
+    const { title, dose, date, img, nextDose, empty, id } = item
+    return (
+      <Pressable onPress={() => selectVaccine(id)}>
+        <Vaccine title={title} dose={dose} date={date} img={img} nextDose={`Próxima dose em ${nextDose}`} empty={empty} />
+      </Pressable>
+    )
+    function selectVaccine(id) {
+      props.selectVaccine(id)
+      navigation.navigate("EditVaccine")
+    }
   }
+
   return (
     <View style={styles.container}>
       <Header navigation={navigation} />
       <View style={styles.body}>
-        <View className="vaccines">
+        <View className="vaccines" style={styles.vaccines}>
           <FlatList
-            data={createVaccines(vaccines)}
+            data={vaccines}
             renderItem={renderVaccine}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             numColumns={2}
           />
         </View>
         <View className="form-buttons" style={styles.buttonContainer}>
-          <Button title="Nova vacina" color="green" />
+          <Button title="Nova vacina" color="green" onPress={navigateToCreateVaccine} />
         </View>
       </View>
       <StatusBar style="auto" />
@@ -84,17 +57,24 @@ export default function Vaccines({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    alignItens: "center",
     backgroundColor: "#ADD4D0",
   },
-  centerText: {
-    fontSize: "30px"
+  buttonContainer: {
+    marginBottom: 70,
   },
-  buttonContainer: { },
+  vaccines: {
+    flex: 1,
+    alignItems: "center",
+  },
   body: {
     flex: 1,
-    alignItens: 'flex-end',
+    justifyItems: 'flex-end',
   }
 });
+
+const mapStateToProps = state => {
+  const vaccines = getVaccines(state)
+  return { vaccines }
+}
+
+export default connect(mapStateToProps, { selectVaccine })(Vaccines)

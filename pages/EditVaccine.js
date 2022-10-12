@@ -1,54 +1,90 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Image, Text, TextInput, Pressable } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, View, Image, Text, TextInput, Pressable, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import Header from "../components/Header"
 import Button from "../components/Button"
+import DeleteModal from '../components/DeleteModal';
 import Radio from "../components/Radio"
-import { connect } from 'react-redux';
-import { addVaccine } from '../redux/actions';
+import { connect } from "react-redux"
+import { getSelectedVaccine, getVaccines } from '../redux/selectors';
+import { editVaccine, removeVaccine } from '../redux/actions';
 
-function CreateVaccine(props) {
+function EditVaccine(props) {
   const { navigation } = props
+  const [modalVisible, setModalVisible] = useState(false)
 
-  const [image, setImage] = useState(null);
-  const [date, setDate] = useState(null);
-  const [title, setTitle] = useState(null);
-  const [dose, setDose] = useState(null);
-  const [nextDose, setNextDose] = useState(null);
+  const [date, setDate] = useState(props.currentVaccine.date);
+  const [title, setTitle] = useState(props.currentVaccine.title);
+  const [dose, setDose] = useState(props.currentVaccine.dose);
+  const [image, setImage] = useState(props.currentVaccine.image);
+  const [nextDose, setNextDose] = useState(props.currentVaccine.nextDose);
 
-  const pickImage = async () => {
+  useEffect(() => {
+    let loaded = false
+    if (loaded != false) {
+      console.log("load")
+      setDate(props.currentVaccine.date)
+      setTitle(props.currentVaccine.title);
+      setDose(props.currentVaccine.dose);
+      setImage(props.currentVaccine.image);
+      setNextDose(props.currentVaccine.nextDose);
+      loaded = true
+    }
+  }, [navigation, date, title, dose, image, nextDose])
+
+
+  async function pickImage() {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
-    if (!result.cancelled) {
-      setImage(result.uri);
-    }
+    if (!result.cancelled) setImage(result.uri);
   };
+
   function setSelectedRadio(options) {
     const selected = options.findIndex(option => option.selected === true)
     setDose(options[selected].value)
   }
-  function save() {
-    props.addVaccine({ image, date, title, dose, nextDose })
+
+  function saveUpdates() {
+    props.editVaccine(props.selectedVaccine, { date, title, dose, image, nextDose })
     navigation.navigate("Vaccines")
   }
+  
+  function removeItem() {
+    props.removeVaccine(props.selectedVaccine)
+    setModalVisible(false)
+    navigation.navigate("Vaccines")
+  }
+
   return (
     <View style={styles.container}>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+        style={styles.modal}
+      >
+        <DeleteModal onPress={removeItem} setVisible={setModalVisible} />
+      </Modal>
+
       <Header navigation={navigation} />
       <View style={styles.body}>
         <View style={styles.inputs}>
           <View style={styles.inputs.outer}>
             <Text style={styles.label}>Data de vacinação</Text>
-            <TextInput style={styles.textInput} placeholder="29/08/2000" placeholderTextColor="#3F92C5" onChangeText={setDate} > </TextInput>
+            <TextInput style={styles.textInput} value={date} onChangeText={setDate} placeholder="29/08/2000" placeholderTextColor="#3F92C5" > </TextInput>
           </View>
           <View style={styles.inputs.outer}>
             <Text style={styles.label}>Vacina</Text>
-            <TextInput style={styles.textInput} placeholder="Hepatite B" placeholderTextColor="#3F92C5" onChangeText={setTitle} > </TextInput>
+            <TextInput style={styles.textInput} value={title} onChangeText={setTitle} placeholder="Hepatite B" placeholderTextColor="#3F92C5" > </TextInput>
           </View>
           <View style={styles.inputs.outer}>
             <Text style={styles.label}>Dose</Text>
@@ -65,13 +101,14 @@ function CreateVaccine(props) {
           </View>
           <View style={styles.inputs.outer}>
             <Text style={styles.label}>Próxima vacinação</Text>
-            <TextInput style={styles.textInput} placeholder="29/08/2000" placeholderTextColor="#3F92C5" onChangeText={setNextDose} > </TextInput>
+            <TextInput style={styles.textInput} value={nextDose} onChangeText={setNextDose} placeholder="29/08/2000" placeholderTextColor="#3F92C5" > </TextInput>
           </View>
         </View>
         <View className="form-buttons" style={styles.buttonContainer}>
           <View style={styles.saveButton}>
-            <Button title="Cadastrar" color="green" onPress={save} />
+            <Button title="Salvar alterações" color="green" onPress={saveUpdates} />
           </View>
+          <Button title="Excluir" color="red" onPress={() => setModalVisible(true)} />
         </View>
       </View><StatusBar style="auto" />
     </View>
@@ -142,10 +179,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 5,
   },
+  modal: {
+    alignSelf: "center",
+    justifySelf: "center",
+    marginTop: 500,
+  }
 });
 
+const mapStateToProps = state => {
+  const vaccines = getVaccines(state)
+  const selectedVaccine = getSelectedVaccine(state)
+  const currentVaccine = vaccines[selectedVaccine]
+  return { vaccines, selectedVaccine, currentVaccine }
+}
 
-export default connect(
-  null,
-  { addVaccine }
-)(CreateVaccine)
+export default connect(mapStateToProps, { editVaccine, removeVaccine })(EditVaccine)
